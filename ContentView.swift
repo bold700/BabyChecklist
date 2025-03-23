@@ -7,25 +7,20 @@ struct Activity: Identifiable {
 }
 
 struct ContentView: View {
-    @AppStorage("activities") private var activitiesData: Data = Data()
-    @AppStorage("vitaminGiven") private var vitaminGiven = false
-    
     @State private var activities: [Activity] = []
     @State private var showingAddSleep = false
     @State private var showingAddFeeding = false
-    @State private var sleepTime = Date()
+    @State private var vitaminGiven = false
+    @State private var sleepStartTime = Date()
+    @State private var sleepEndTime = Date()
     @State private var feedingTime = Date()
-    
-    var sortedActivities: [Activity] {
-        activities.sorted { $0.time > $1.time }
-    }
     
     var body: some View {
         NavigationStack {
             List {
                 Section("Slaaptijden") {
-                    ForEach(sortedActivities.filter { $0.type == "Slaap" }) { activity in
-                        Text(activity.time.formatted(date: .abbreviated, time: .shortened))
+                    ForEach(activities.filter { $0.type == "Slaap" }) { activity in
+                        Text(activity.time.formatted())
                     }
                     Button("Slaaptijd toevoegen") {
                         showingAddSleep = true
@@ -33,8 +28,8 @@ struct ContentView: View {
                 }
                 
                 Section("Drinktijden") {
-                    ForEach(sortedActivities.filter { $0.type == "Drinken" }) { activity in
-                        Text(activity.time.formatted(date: .abbreviated, time: .shortened))
+                    ForEach(activities.filter { $0.type == "Drinken" }) { activity in
+                        Text(activity.time.formatted())
                     }
                     Button("Drinktijd toevoegen") {
                         showingAddFeeding = true
@@ -49,12 +44,13 @@ struct ContentView: View {
             .sheet(isPresented: $showingAddSleep) {
                 NavigationStack {
                     Form {
-                        DatePicker("Tijd", selection: $sleepTime)
+                        DatePicker("Start tijd", selection: $sleepStartTime)
+                        DatePicker("Eind tijd", selection: $sleepEndTime)
                     }
                     .navigationTitle("Slaaptijd toevoegen")
                     .toolbar {
                         Button("Gereed") {
-                            activities.append(Activity(type: "Slaap", time: sleepTime))
+                            activities.append(Activity(type: "Slaap", time: sleepStartTime))
                             showingAddSleep = false
                         }
                     }
@@ -76,4 +72,8 @@ struct ContentView: View {
             }
         }
     }
+}
+
+#Preview {
+    ContentView()
 } 
